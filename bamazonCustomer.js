@@ -77,7 +77,6 @@ function buyProduct() {
     });
 }
 
-
 function checkOrder(buyID, buyUnits){
     var query = 'SELECT * FROM products WHERE ?';
     connection.query(query, {item_id: buyID}, function(err, res) {
@@ -89,8 +88,26 @@ function checkOrder(buyID, buyUnits){
 
         if((stockUnits-buyUnits) < 0){
             console.log('Insufficient quantity.');
+            buyAgain();
         } else {
             console.log('true');
+        }
+    });
+}
+
+function buyAgain(){
+    inquirer
+    .prompt({
+        name: "buy",
+        type: "confirm",
+        message: "Do you want to buy another item?",
+    })
+    .then(function(answer) {
+        if(answer.buy){
+            buyAgain();
+        } else {
+            console.log('Thank you! Comeback again!');
+            process.exit();
         }
     });
 }
