@@ -74,6 +74,13 @@ function buyProduct() {
             name: "units",
             type: "input",
             message: "How many units would you like to purchase?",
+            validate: function validateUnits(units){
+                if(!isNaN(units)){
+                    return true;
+                } else {
+                    console.log('\nPlease enter number.');
+                }
+            }
         })
         .then(function(answer) {
             var buyUnits = answer.units;            
