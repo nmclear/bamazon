@@ -66,11 +66,7 @@ function buyProduct() {
                 message: "How many units would you like to purchase?",
             })
             .then(function(answer) {
-                var buyUnits = answer.units;
-                console.log('item to purchase: ' + buyID);
-                console.log('number of units: ' + buyUnits);
-                var query = 'SELECT item_id, product_name, price FROM products';
-            
+                var buyUnits = answer.units;            
                 checkOrder(buyID, buyUnits);
             });
         }
@@ -82,16 +78,23 @@ function checkOrder(buyID, buyUnits){
     connection.query(query, {item_id: buyID}, function(err, res) {
   
         var result = res[0];
+        var name = result.product_name;
         var stockUnits = result.stock_quantity;
+        var itemPrice = result.price;
+        var unitsLeft = stockUnits-buyUnits;
 
-        console.log(stockUnits + '.. stock units');
+        console.log('Checking ' + name + ' stock quantity..');
 
-        if((stockUnits-buyUnits) < 0){
+        if(unitsLeft < 0){
             console.log('Insufficient quantity.');
-            buyAgain();
         } else {
-            console.log('true');
+            updateProduct(buyID,unitsLeft);
+            var totalCost = buyUnits * itemPrice;
+            console.log('Approved! \nTotal Cost: $' + totalCost + '\n' +
+                'Thank you for the purchase of the ' + name + '.' 
+            );
         }
+        buyAgain();
     });
 }
 
@@ -106,8 +109,22 @@ function buyAgain(){
         if(answer.buy){
             buyAgain();
         } else {
-            console.log('Thank you! Comeback again!');
+            console.log('Thank you! Come back again!');
             process.exit();
         }
     });
+}
+
+function updateProduct(id,units) {
+    var query = "UPDATE products SET ? WHERE ?";
+    connection.query(query,
+        [
+            {
+                stock_quantity: units
+            },
+            {
+                item_id: id
+            }
+        ]
+    );
 }
