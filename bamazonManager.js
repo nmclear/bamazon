@@ -73,7 +73,17 @@ function managerScreen() {
 }
 
 function viewProducts(){
-    console.log('view products');
+    var query = 'SELECT * FROM products';
+    connection.query(query, function(err, res) {
+        console.log(chalk.blue('=============================== WELCOME TO BAMAZON ==============================\n' + 
+            '-------------------------------- ITEMS FOR SALE ---------------------------------'
+        ));
+        for (var i = 0; i < res.length; i++) {
+            console.log("ID: " + res[i].item_id + " || Product Name: " + res[i].product_name + " || Price: " + res[i].price + " || Stock: " + res[i].stock_quantity);
+        }
+        console.log(chalk.blue('================================================================================'));
+        anotherTask();
+    });
 }
 
 function viewLowInventory(){
@@ -86,4 +96,25 @@ function addInventory(){
 
 function addProduct(){
     console.log('add product');
+}
+
+
+
+
+
+function anotherTask(){
+    inquirer
+    .prompt({
+        name: "task",
+        type: "confirm",
+        message: "Do you want to perform another task?",
+    })
+    .then(function(answer) {
+        if(answer.task){
+            managerScreen();
+        } else {
+            console.log(chalk.blue('See you soon.'));
+            process.exit();
+        }
+    });
 }
