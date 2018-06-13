@@ -7,5 +7,5 @@ exports.host = {
 
 exports.database = {
   name: process.env.DATABASE_NAME,
-  password: process.env.DATABASE_PASSWORD
+  password: process.env.DATABASE_PASSWORD,
 };
