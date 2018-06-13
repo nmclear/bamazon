@@ -1,4 +1,3 @@
-console.log('this is loaded');
 
 exports.host = {
   host_name: process.env.HOST_NAME,
