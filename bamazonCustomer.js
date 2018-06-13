@@ -1,28 +1,36 @@
+require("dotenv").config();
 
 var keys = require("./keys.js");
 
 var mysql = require("mysql");
 var inquirer = require("inquirer");
+var chalk = require('chalk');
 
 //========================================================================================================================
 // PRIVATE INFO
 //========================================================================================================================
 
-var port_number = keys.port_number;
-var host_name = keys.host_name;
+var port_number = keys.host.port_number;
+var host_name = keys.host.host_name;
 var database_password = keys.database.password;
-var database_name = keys.database_name;
+var database_name = keys.database.name;
+
+//========================================================================================================================
+// ARRAY TO STORE PRODUCT IDs FOR SALE
+//========================================================================================================================
+
+var idArr = [];
 
 //========================================================================================================================
 // DATABASE CONNECTIONS
 //========================================================================================================================
 
 var connection = mysql.createConnection({
-    host: 'localhost',
-    port: 3306,
+    host: host_name,
+    port: port_number,
     user: "root",
-    password: '',
-    database: 'bamazonDB'
+    password: database_password,
+    database: database_name
 });
 
 connection.connect(function(err) {
@@ -39,11 +47,16 @@ function displayAllItems() {
     var query = 'SELECT item_id, product_name, price FROM products';
 
     connection.query(query, function(err, res) {
+        console.log(chalk.blue('========================== WELCOME TO BAMAZON ==========================\n' + 
+            '---------------------------- ITEMS FOR SALE ----------------------------'
+        ));
         for (var i = 0; i < res.length; i++) {
-          console.log("ID: " + res[i].item_id + " || Product Name: " + res[i].product_name + " || Price: " + res[i].price);
+            console.log("ID: " + res[i].item_id + " || Product Name: " + res[i].product_name + " || Price: " + res[i].price);
+            idArr.push(res[i].item_id);
         }
+        console.log(chalk.blue('======================================================================='));
+        buyProduct();
     });
-    buyProduct();
 }
 
 function buyProduct() {
@@ -52,24 +65,20 @@ function buyProduct() {
         name: "item_id",
         type: "input",
         message: "What is the ID of the product you would like to buy?",
+        validate: validateID
       })
       .then(function(answer) {
         var buyID = answer.item_id
-        if(isNaN(buyID)){
-            console.log('Please select a valid ID.')
-            buyProduct();
-        } else {
-            inquirer
-            .prompt({
-                name: "units",
-                type: "input",
-                message: "How many units would you like to purchase?",
-            })
-            .then(function(answer) {
-                var buyUnits = answer.units;            
-                checkOrder(buyID, buyUnits);
-            });
-        }
+        inquirer
+        .prompt({
+            name: "units",
+            type: "input",
+            message: "How many units would you like to purchase?",
+        })
+        .then(function(answer) {
+            var buyUnits = answer.units;            
+            checkOrder(buyID, buyUnits);
+        });
     });
 }
 
@@ -86,13 +95,14 @@ function checkOrder(buyID, buyUnits){
         console.log('Checking ' + name + ' stock quantity..');
 
         if(unitsLeft < 0){
-            console.log('Insufficient quantity.');
+            console.log(chalk.red('Insufficient quantity.'))
+            console.log('We only have ' + stockUnits + ' of ' + name + ' in stock.');
         } else {
             updateProduct(buyID,unitsLeft);
             var totalCost = buyUnits * itemPrice;
-            console.log('Approved! \nTotal Cost: $' + totalCost + '\n' +
-                'Thank you for the purchase of the ' + name + '.' 
-            );
+            console.log(chalk.green('Approved!'));
+            console.log('Total Cost: $' + totalCost + '\n' +
+                'Thank you for the purchase of the ' + name + '.');
         }
         buyAgain();
     });
@@ -107,9 +117,9 @@ function buyAgain(){
     })
     .then(function(answer) {
         if(answer.buy){
-            buyAgain();
+            buyProduct();
         } else {
-            console.log('Thank you! Come back again!');
+            console.log(chalk.blue('Thank you! Come again soon!'));
             process.exit();
         }
     });
@@ -127,4 +137,18 @@ function updateProduct(id,units) {
             }
         ]
     );
+}
+
+function validateID(item_id){
+    var check = false;
+    for(var i = 0; i < idArr.length; i++){
+        if(idArr[i] === parseInt(item_id)){
+            check = true;
+        }
+    }
+    if(check){
+        return true;
+    } else {
+        console.log(chalk.red('\nPlease select a valid ID.'));
+    }
 }
