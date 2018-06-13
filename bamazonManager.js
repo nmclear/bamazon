@@ -168,7 +168,66 @@ function addInventory(){
 }
 
 function addProduct(){
-    console.log('add product');
+
+    inquirer
+    .prompt([
+      {
+        name: "product",
+        type: "input",
+        message: "What is the product you would like to add?"
+      },
+      {
+        name: "department",
+        type: "input",
+        message: "What department does the product belong in?"
+      },
+      {
+        name: "price",
+        type: "input",
+        message: "What is the price of the product?",
+        validate: function validatePrice(price){
+            if(!isNaN(price)){
+                return true;
+            } else {
+                console.log('\nPlease enter number.');
+            }
+        }
+       },
+      {
+        name: "stock",
+        type: "input",
+        message: "What is the stock quantity of the product?",
+        validate: function validateUnits(units){
+            if(!isNaN(units)){
+                return true;
+            } else {
+                console.log('\nPlease enter number.');
+            }
+        }
+       }
+    ]).then(function(response){
+
+        var query = "INSERT INTO products SET ?";
+        connection.query(query,
+            {
+                product_name: response.product,
+                department_name: response.department,
+                price: response.price,
+                stock_quantity: response.stock
+            },
+            function(err) {
+                if (err) throw err;
+                console.log("Your item was added successfully!");
+                console.log('Product: ' + response.product);
+                console.log('Department: ' + response.department);
+                console.log('Price: ' + response.price);
+                console.log('Stock: ' + response.stock);
+                anotherTask();
+            }
+        );
+    });
+
+
 }
 
 
