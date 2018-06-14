@@ -6,8 +6,6 @@ var mysql = require("mysql");
 var inquirer = require("inquirer");
 var chalk = require('chalk');
 
-
-
 var idArr = [];
 //========================================================================================================================
 // PRIVATE INFO
@@ -128,13 +126,7 @@ function addInventory(){
             name: "units",
             type: "input",
             message: "How many units do you want to add?",
-            validate: function validateUnits(units){
-                if(!isNaN(units)){
-                    return true;
-                } else {
-                    console.log('\nPlease enter number.');
-                }
-            }
+            validate: validateNum
         }
         ])
         .then(function(answer) {
@@ -185,25 +177,13 @@ function addProduct(){
         name: "price",
         type: "input",
         message: "What is the price of the product?",
-        validate: function validatePrice(price){
-            if(!isNaN(price)){
-                return true;
-            } else {
-                console.log('\nPlease enter number.');
-            }
-        }
+        validate: validateNum
        },
       {
         name: "stock",
         type: "input",
         message: "What is the stock quantity of the product?",
-        validate: function validateUnits(units){
-            if(!isNaN(units)){
-                return true;
-            } else {
-                console.log('\nPlease enter number.');
-            }
-        }
+        validate: validateNum
        }
     ]).then(function(response){
 
@@ -217,7 +197,7 @@ function addProduct(){
             },
             function(err) {
                 if (err) throw err;
-                console.log("Your item was added successfully!");
+                console.log(chalk.green(response.product + " was added successfully!"));
                 console.log('Product: ' + response.product);
                 console.log('Department: ' + response.department);
                 console.log('Price: ' + response.price);
@@ -226,13 +206,7 @@ function addProduct(){
             }
         );
     });
-
-
 }
-
-
-
-
 
 function anotherTask(){
     inquirer
@@ -245,12 +219,11 @@ function anotherTask(){
         if(answer.task){
             managerScreen();
         } else {
-            console.log(chalk.blue('See you soon.'));
+            console.log(chalk.blue('Exiting manager mode.'));
             process.exit();
         }
     });
 }
-
 
 function validateID(item_id){
     var check = false;
@@ -263,5 +236,13 @@ function validateID(item_id){
         return true;
     } else {
         console.log(chalk.red('\nPlease select a valid ID.'));
+    }
+}
+
+function validateNum(input){
+    if(!isNaN(input)){
+        return true;
+    } else {
+        console.log(chalk.red('\nPlease enter number.'));
     }
 }
