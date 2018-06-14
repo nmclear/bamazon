@@ -13,6 +13,7 @@ var idArr = [];
 
 var port_number = keys.host.port_number;
 var host_name = keys.host.host_name;
+var root_user = keys.host.root_user;
 var database_password = keys.database.password;
 var database_name = keys.database.name;
 
@@ -23,7 +24,7 @@ var database_name = keys.database.name;
 var connection = mysql.createConnection({
     host: host_name,
     port: port_number,
-    user: "root",
+    user: root_user,
     password: database_password,
     database: database_name
 });
@@ -32,7 +33,6 @@ connection.connect(function(err) {
     if (err) throw err;
     //first function to run on start
     managerScreen();
-    
 });
 
 //========================================================================================================================
